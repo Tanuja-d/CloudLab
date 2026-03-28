@@ -1,5 +1,6 @@
 from extensions import mongo
 from bson import ObjectId
+from bson.errors import InvalidId
 from services.evaluation_service import evaluate_code
 
 
@@ -7,7 +8,12 @@ def submit_lab(user_id, lab_id, code):
     if not code or not code.strip():
         return {"success": False, "message": "Code cannot be empty"}
 
-    lab = mongo.db.labs.find_one({"_id": ObjectId(lab_id)})
+    try:
+        lab_oid = ObjectId(lab_id)
+    except InvalidId:
+        return {"success": False, "message": "Invalid lab."}
+
+    lab = mongo.db.labs.find_one({"_id": lab_oid})
     if not lab:
         return {"success": False, "message": "Lab not found"}
 

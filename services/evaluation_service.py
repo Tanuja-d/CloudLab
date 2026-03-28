@@ -1,11 +1,36 @@
+import json
+import re
+
 import google.generativeai as genai
 from config import Config
 
 genai.configure(api_key=Config.GEMINI_API_KEY)
 model = genai.GenerativeModel(Config.GEMINI_MODEL)
 
+_MAX_FIELD = 80_000
+
+
+def _clip(text, limit=_MAX_FIELD):
+    if not text:
+        return ""
+    text = str(text)
+    if len(text) > limit:
+        return text[:limit] + "\n[Truncated for evaluation.]"
+    return text
+
+
+def _gemini_response_text(response):
+    try:
+        return response.text
+    except (ValueError, AttributeError):
+        return None
+
 
 def evaluate_code(problem_statement, expected_output, submitted_code, attempt_number):
+    problem_statement = _clip(problem_statement)
+    expected_output = _clip(expected_output)
+    submitted_code = _clip(submitted_code, limit=50_000)
+
     prompt = f"""
 You are a strict lab evaluator for an engineering college virtual lab system.
 
@@ -36,20 +61,35 @@ Scoring rules:
 - Incorrect: 0-29
 - Pass if score >= 60
 """
-    response = model.generate_content(prompt)
-    text = response.text.strip()
-    
-    # Clean up any potential markdown formatting
+    try:
+        response = model.generate_content(prompt)
+    except Exception:
+        return {
+            "score": 0,
+            "status": "Fail",
+            "feedback": "AI evaluation failed. Check GEMINI_API_KEY and GEMINI_MODEL on the server, or try again later.",
+            "correctness": "Incorrect",
+        }
+
+    text = _gemini_response_text(response)
+    if not text or not text.strip():
+        return {
+            "score": 0,
+            "status": "Fail",
+            "feedback": "AI returned no evaluation (blocked or empty). Please try again.",
+            "correctness": "Incorrect",
+        }
+    text = text.strip()
+
     if text.startswith("```json"):
         text = text[7:]
     elif text.startswith("```"):
         text = text[3:]
     if text.endswith("```"):
         text = text[:-3]
-        
+
     text = text.strip()
 
-    import json, re
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -60,4 +100,9 @@ Scoring rules:
             except json.JSONDecodeError:
                 pass
 
-    return {"score": 0, "status": "Fail", "feedback": "Evaluation failed. Please retry.", "correctness": "Incorrect"}
+    return {
+        "score": 0,
+        "status": "Fail",
+        "feedback": "Could not parse AI evaluation. Please retry.",
+        "correctness": "Incorrect",
+    }
