@@ -2,17 +2,38 @@ import google.generativeai as genai
 from config import Config
 from extensions import mongo
 from bson import ObjectId
+from bson.errors import InvalidId
 import json, re
+
+MAX_LAB_CHARS_FOR_AI = 120_000
 
 genai.configure(api_key=Config.GEMINI_API_KEY)
 model = genai.GenerativeModel(Config.GEMINI_MODEL)
 
 
+def _gemini_response_text(response):
+    try:
+        return response.text
+    except (ValueError, AttributeError):
+        return None
+
+
 def get_lab_content(lab_id):
-    lab = mongo.db.labs.find_one({"_id": ObjectId(lab_id)})
+    if not lab_id or not isinstance(lab_id, str):
+        return None
+    try:
+        oid = ObjectId(lab_id)
+    except InvalidId:
+        return None
+    lab = mongo.db.labs.find_one({"_id": oid})
     if not lab:
         return None
-    return lab.get("content") or lab.get("problem_statement") or ""
+    raw = lab.get("content") or lab.get("problem_statement") or ""
+    if not raw:
+        return None
+    if len(raw) > MAX_LAB_CHARS_FOR_AI:
+        raw = raw[:MAX_LAB_CHARS_FOR_AI] + "\n\n[Truncated for AI — lab content was very long.]"
+    return raw
 
 
 def generate_mcqs(lab_id, num_questions, difficulty):
@@ -43,8 +64,21 @@ Respond in the following JSON format only, no extra text:
     ]
 }}
 """
-    response = model.generate_content(prompt)
-    text = response.text.strip()
+    try:
+        response = model.generate_content(prompt)
+    except Exception:
+        return {
+            "success": False,
+            "message": "AI request failed. Check GEMINI_API_KEY and GEMINI_MODEL on the server, or try again later.",
+        }
+
+    text = _gemini_response_text(response)
+    if not text or not text.strip():
+        return {
+            "success": False,
+            "message": "The AI returned no text (blocked or empty). Try a different lab or shorten lab content.",
+        }
+    text = text.strip()
     
     # Clean up any potential markdown formatting
     if text.startswith("```json"):
@@ -99,8 +133,21 @@ Respond in the following JSON format only:
     "found_in_material": <true or false>
 }}
 """
-    response = model.generate_content(prompt)
-    text = response.text.strip()
+    try:
+        response = model.generate_content(prompt)
+    except Exception:
+        return {
+            "success": False,
+            "message": "AI request failed. Check GEMINI_API_KEY and GEMINI_MODEL on the server, or try again later.",
+        }
+
+    text = _gemini_response_text(response)
+    if not text or not text.strip():
+        return {
+            "success": False,
+            "message": "The AI returned no text (blocked or empty). Try again or rephrase your question.",
+        }
+    text = text.strip()
     
     # Clean up any potential markdown formatting
     if text.startswith("```json"):

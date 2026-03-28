@@ -59,13 +59,17 @@ def ask_ai():
 @student_bp.route("/ask-ai/mcq", methods=["POST"])
 @student_required
 def mcq():
-    data = request.json
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "Invalid or missing JSON body."}), 400
     result = generate_mcqs(data.get("lab_id"), data.get("num_questions"), data.get("difficulty"))
     return jsonify(result)
 
 @student_bp.route("/ask-ai/doubt", methods=["POST"])
 @student_required
 def doubt():
-    data = request.json
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "Invalid or missing JSON body."}), 400
     result = solve_doubt(data.get("lab_id"), data.get("question"))
     return jsonify(result)
