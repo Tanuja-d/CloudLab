@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-style: normal; background: #f3f4f6; color: #111827; }
+h1,h2,h3,h4,h5,p,span,a,li,div { font-style: normal; }
+:root { --blue: #1d4ed8; --blue-light: #dbeafe; --cyan: #0891b2; --border: #e5e7eb; --gray-text: #6b7280; }
+
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: 240px; background: #0f172a;
+  display: flex; flex-direction: column;
+  padding: 0; z-index: 50;
+}
+
+.sidebar-logo {
+  padding: 24px 24px 20px;
+  font-size: 1rem; font-weight: 800;
+  color: white; letter-spacing: -0.02em;
+  text-decoration: none; display: block;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-user {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-user .name {
+  font-size: 0.855rem; font-weight: 700; color: white;
+}
+
+.sidebar-user .meta {
+  font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 0.855rem; font-weight: 500;
+  color: #94a3b8; text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(29,78,216,0.25); color: #93c5fd; }
+.nav-item svg { flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.logout-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 0.855rem; font-weight: 500;
+  color: #64748b; text-decoration: none;
+  transition: background 0.2s, color 0.2s; width: 100%;
+  background: none; border: none; cursor: pointer;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.06); color: #f87171; }
+
+.main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.page-header p { font-size: 0.875rem; font-weight: 400; color: var(--gray-text); margin-top: 4px; }
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 28px;
+}
+
+.stat-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 22px;
+}
+
+.stat-card .label {
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--gray-text); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 8px;
+}
+
+.stat-card .value {
+  font-size: 1.8rem; font-weight: 800;
+  color: #0f172a; letter-spacing: -0.03em;
+}
+
+.stat-card .sub {
+  font-size: 0.75rem; font-weight: 400;
+  color: var(--gray-text); margin-top: 4px;
+}
+
+.progress-bar-track {
+  width: 100%; height: 6px;
+  background: #e5e7eb; border-radius: 99px; margin-top: 10px;
+}
+
+.progress-bar-fill {
+  height: 6px; border-radius: 99px; background: var(--blue);
+  transition: width 0.5s ease;
+}
+
+.semester-banner {
+  border-radius: 12px; padding: 18px 22px;
+  margin-bottom: 28px; display: flex;
+  align-items: center; justify-content: space-between;
+  border: 1px solid;
+}
+
+.semester-banner.passed {
+  background: #f0fdf4; border-color: #bbf7d0;
+}
+
+.semester-banner.pending {
+  background: #fffbeb; border-color: #fde68a;
+}
+
+.semester-banner .msg {
+  font-size: 0.9rem; font-weight: 600;
+}
+
+.semester-banner.passed .msg { color: #15803d; }
+.semester-banner.pending .msg { color: #92400e; }
+
+.semester-banner .sub {
+  font-size: 0.8rem; font-weight: 400; margin-top: 2px;
+}
+
+.semester-banner.passed .sub { color: #166534; }
+.semester-banner.pending .sub { color: #78350f; }
+
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  font-size: 1rem; font-weight: 700; color: #0f172a;
+}
+
+.section-header .count {
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--gray-text); background: #f3f4f6;
+  padding: 3px 10px; border-radius: 99px;
+}
+
+.labs-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 32px;
+}
+
+.lab-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  text-decoration: none; display: block;
+}
+
+.lab-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.07); transform: translateY(-2px); }
+
+.lab-card .lab-type {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  display: inline-block; margin-bottom: 12px;
+}
+
+.type-compulsory { background: var(--blue-light); color: var(--blue); }
+.type-practice { background: #dcfce7; color: #15803d; }
+.type-missed { background: #fef2f2; color: #b91c1c; }
+
+.lab-card .lab-title {
+  font-size: 0.925rem; font-weight: 700;
+  color: #0f172a; margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.lab-card .lab-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.lab-status {
+  font-size: 0.75rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 4px;
+}
+
+.status-pass { background: #dcfce7; color: #15803d; }
+.status-fail { background: #fef2f2; color: #b91c1c; }
+.status-pending { background: #f3f4f6; color: #6b7280; }
+.status-absent { background: #fef2f2; color: #b91c1c; }
+.status-virtual { background: #fffbeb; color: #92400e; }
+
+.lab-score {
+  font-size: 0.78rem; font-weight: 600; color: var(--gray-text);
+}
+
+.empty-state {
+  background: white; border: 1px dashed var(--border);
+  border-radius: 12px; padding: 36px;
+  text-align: center; color: var(--gray-text);
+  font-size: 0.875rem; font-weight: 400;
+  margin-bottom: 32px;
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">SmartVirtualLab</a>
+  <div class="sidebar-user">
+    <div class="name">{{ session.name }}</div>
+    <div class="meta">Student &mdash; Semester {{ semester_status.semester }}</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/student/dashboard" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a href="/student/missed-labs" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Missed Labs
+      {% if labs.missed | length > 0 %}
+      <span style="background:#fef2f2;color:#b91c1c;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:99px;margin-left:auto;">{{ labs.missed | length }}</span>
+      {% endif %}
+    </a>
+    <a href="/student/progress" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Progress
+    </a>
+    <a href="/student/ask-ai" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      Ask AI
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <h1>Welcome back, {{ session.name }}</h1>
+    <p>Here is your lab overview for Semester {{ semester_status.semester }}</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="label">Total Labs</div>
+      <div class="value">{{ semester_status.total_labs }}</div>
+      <div class="sub">Assigned this semester</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Labs Passed</div>
+      <div class="value">{{ semester_status.passed_labs }}</div>
+      <div class="sub">Out of {{ semester_status.total_labs }} compulsory</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Missed Labs</div>
+      <div class="value">{{ labs.missed | length }}</div>
+      <div class="sub">Pending recovery</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Progress</div>
+      <div class="value">{{ semester_status.progress_percent }}%</div>
+      <div class="sub">Towards semester pass</div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ semester_status.progress_percent }}%;"></div>
+      </div>
+    </div>
+  </div>
+
+  {% if semester_status.message %}
+  <div class="semester-banner {{ 'passed' if semester_status.promoted else 'pending' }}">
+    <div>
+      <div class="msg">{{ semester_status.message }}</div>
+      <div class="sub">{{ semester_status.passed_labs }} of {{ semester_status.total_labs }} compulsory labs passed</div>
+    </div>
+    {% if semester_status.promoted %}
+    <svg width="24" height="24" fill="none" stroke="#15803d" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="section-header">
+    <h2>Compulsory Labs</h2>
+    <span class="count">{{ labs.compulsory | length }} labs</span>
+  </div>
+
+  {% if labs.compulsory %}
+  <div class="labs-grid">
+    {% for lab in labs.compulsory %}
+    <a href="/student/lab/{{ lab._id }}" class="lab-card">
+      <span class="lab-type type-compulsory">Compulsory</span>
+      <div class="lab-title">{{ lab.title }}</div>
+      <div class="lab-meta">
+        {% if lab.submission %}
+          <span class="lab-status {{ 'status-pass' if lab.submission.status == 'Pass' else 'status-fail' }}">{{ lab.submission.status }}</span>
+          <span class="lab-score">{{ lab.submission.score }}/100</span>
+        {% else %}
+          <span class="lab-status status-pending">Not Submitted</span>
+          <span class="lab-score">—</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">No compulsory labs assigned for your semester yet.</div>
+  {% endif %}
+
+  <div class="section-header">
+    <h2>Practice Labs</h2>
+    <span class="count">{{ labs.practice | length }} labs</span>
+  </div>
+
+  {% if labs.practice %}
+  <div class="labs-grid">
+    {% for lab in labs.practice %}
+    <a href="/student/lab/{{ lab._id }}" class="lab-card">
+      <span class="lab-type type-practice">Practice</span>
+      <div class="lab-title">{{ lab.title }}</div>
+      <div class="lab-meta">
+        {% if lab.submission %}
+          <span class="lab-status {{ 'status-pass' if lab.submission.status == 'Pass' else 'status-fail' }}">{{ lab.submission.status }}</span>
+          <span class="lab-score">{{ lab.submission.score }}/100</span>
+        {% else %}
+          <span class="lab-status status-pending">Not Submitted</span>
+          <span class="lab-score">—</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">No practice labs assigned yet.</div>
+  {% endif %}
+
+  {% if labs.missed %}
+  <div class="section-header">
+    <h2>Missed Labs</h2>
+    <span class="count">{{ labs.missed | length }} pending</span>
+  </div>
+  <div class="labs-grid">
+    {% for lab in labs.missed %}
+    <a href="/student/lab/{{ lab._id }}" class="lab-card">
+      <span class="lab-type type-missed">Missed</span>
+      <div class="lab-title">{{ lab.title }}</div>
+      <div class="lab-meta">
+        {% if lab.submission %}
+          <span class="lab-status status-virtual">Submitted Virtually</span>
+          <span class="lab-score">{{ lab.submission.score }}/100</span>
+        {% else %}
+          <span class="lab-status status-absent">Absent</span>
+          <span class="lab-score">Submit to recover</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+</body>
+</html>

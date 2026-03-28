@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Assign Labs — SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-style: normal; background: #f3f4f6; color: #111827; }
+h1,h2,h3,h4,h5,p,span,a,li,div { font-style: normal; }
+:root { --blue: #1d4ed8; --blue-light: #dbeafe; --border: #e5e7eb; --gray-text: #6b7280; }
+
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: #0f172a; display: flex; flex-direction: column; z-index: 50; }
+.sidebar-logo { padding: 24px 24px 20px; font-size: 1rem; font-weight: 800; color: white; letter-spacing: -0.02em; text-decoration: none; display: block; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user .name { font-size: 0.855rem; font-weight: 700; color: white; }
+.sidebar-user .meta { font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #94a3b8; text-decoration: none; transition: background 0.2s, color 0.2s; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(29,78,216,0.25); color: #93c5fd; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #64748b; text-decoration: none; transition: background 0.2s, color 0.2s; width: 100%; background: none; border: none; cursor: pointer; }
+.logout-btn:hover { background: rgba(255,255,255,0.06); color: #f87171; }
+
+.main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.page-header p { font-size: 0.875rem; font-weight: 400; color: var(--gray-text); margin-top: 4px; }
+
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+
+.card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.card h2 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.825rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 0.875rem; font-weight: 400; font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #0f172a; background: white; outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); }
+.form-group textarea { resize: vertical; min-height: 100px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.btn-submit { width: 100%; padding: 11px; background: var(--blue); color: white; font-size: 0.875rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+.btn-submit:hover { background: #1e40af; }
+.btn-submit:disabled { background: #93c5fd; cursor: not-allowed; }
+
+.success-msg { padding: 12px 14px; border-radius: 8px; font-size: 0.845rem; font-weight: 500; margin-bottom: 16px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; display: none; }
+.error-msg { padding: 12px 14px; border-radius: 8px; font-size: 0.845rem; font-weight: 500; margin-bottom: 16px; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; display: none; }
+
+.labs-list { display: flex; flex-direction: column; gap: 12px; }
+.lab-item { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: #f9fafb; }
+.lab-item .title { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+.lab-item .meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.type-badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; }
+.type-compulsory { background: var(--blue-light); color: var(--blue); }
+.type-practice { background: #dcfce7; color: #15803d; }
+.meta-text { font-size: 0.78rem; font-weight: 500; color: var(--gray-text); }
+.empty-state { text-align: center; padding: 36px; color: var(--gray-text); font-size: 0.875rem; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">SmartVirtualLab</a>
+  <div class="sidebar-user">
+    <div class="name">{{ session.name }}</div>
+    <div class="meta">Faculty</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/faculty/dashboard" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a href="/faculty/assign-labs" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Assign Labs
+    </a>
+    <a href="/faculty/attendance" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Attendance
+    </a>
+    <a href="/faculty/submissions" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Submissions
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <h1>Assign Labs</h1>
+    <p>Create new labs and assign them to semester batches.</p>
+  </div>
+
+  <div class="content-grid">
+    <div class="card">
+      <h2>Create New Lab</h2>
+      <div class="success-msg" id="success-msg"></div>
+      <div class="error-msg" id="error-msg"></div>
+
+      <div class="form-group">
+        <label>Lab Title</label>
+        <input type="text" id="title" placeholder="e.g. Data Structures Lab — Stack Implementation"/>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Semester</label>
+          <select id="semester">
+            <option value="">Select Semester</option>
+            {% for i in range(1, 9) %}
+            <option value="{{ i }}">Semester {{ i }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lab Type</label>
+          <select id="type">
+            <option value="compulsory">Compulsory</option>
+            <option value="practice">Practice</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Problem Statement</label>
+        <textarea id="problem_statement" placeholder="Describe the lab problem in detail..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Expected Output</label>
+        <textarea id="expected_output" style="min-height:70px;" placeholder="What should the correct output look like?"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Lab Content (for AI features)</label>
+        <textarea id="content" style="min-height:70px;" placeholder="Paste lab theory or notes here for MCQ generation and doubt solving..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Deadline (optional)</label>
+        <input type="date" id="deadline"/>
+      </div>
+
+      <button class="btn-submit" id="create-btn" onclick="createLab()">Create Lab</button>
+    </div>
+
+    <div class="card">
+      <h2>Existing Labs ({{ labs | length }})</h2>
+      {% if labs %}
+      <div class="labs-list">
+        {% for lab in labs %}
+        <div class="lab-item">
+          <div class="title">{{ lab.title }}</div>
+          <div class="meta">
+            <span class="type-badge type-{{ lab.type }}">{{ lab.type | capitalize }}</span>
+            <span class="meta-text">Semester {{ lab.semester }}</span>
+            {% if lab.deadline %}<span class="meta-text">Due: {{ lab.deadline }}</span>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">No labs created yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  function createLab() {
+    const title = document.getElementById('title').value.trim();
+    const semester = document.getElementById('semester').value;
+    const type = document.getElementById('type').value;
+    const problem_statement = document.getElementById('problem_statement').value.trim();
+    const expected_output = document.getElementById('expected_output').value.trim();
+    const content = document.getElementById('content').value.trim();
+    const deadline = document.getElementById('deadline').value;
+
+    const successMsg = document.getElementById('success-msg');
+    const errorMsg = document.getElementById('error-msg');
+    successMsg.style.display = 'none';
+    errorMsg.style.display = 'none';
+
+    if (!title || !semester || !problem_statement) {
+      errorMsg.textContent = 'Title, semester, and problem statement are required.';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('create-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('semester', semester);
+    formData.append('type', type);
+    formData.append('problem_statement', problem_statement);
+    formData.append('expected_output', expected_output);
+    formData.append('content', content);
+    formData.append('deadline', deadline);
+
+    fetch('/faculty/assign-labs', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Create Lab';
+      if (data.success) {
+        successMsg.textContent = data.message;
+        successMsg.style.display = 'block';
+        document.getElementById('title').value = '';
+        document.getElementById('semester').value = '';
+        document.getElementById('problem_statement').value = '';
+        document.getElementById('expected_output').value = '';
+        document.getElementById('content').value = '';
+        document.getElementById('deadline').value = '';
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        errorMsg.textContent = data.message;
+        errorMsg.style.display = 'block';
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Create Lab';
+      errorMsg.textContent = 'Something went wrong. Please try again.';
+      errorMsg.style.display = 'block';
+    });
+  }
+</script>
+
+</body>
+</html>

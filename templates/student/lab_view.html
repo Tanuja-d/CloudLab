@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{ lab.title }} — SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-style: normal; background: #f3f4f6; color: #111827; }
+h1,h2,h3,h4,h5,p,span,a,li,div { font-style: normal; }
+:root { --blue: #1d4ed8; --blue-light: #dbeafe; --border: #e5e7eb; --gray-text: #6b7280; }
+
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: #0f172a; display: flex; flex-direction: column; z-index: 50; }
+.sidebar-logo { padding: 24px 24px 20px; font-size: 1rem; font-weight: 800; color: white; letter-spacing: -0.02em; text-decoration: none; display: block; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user .name { font-size: 0.855rem; font-weight: 700; color: white; }
+.sidebar-user .meta { font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #94a3b8; text-decoration: none; transition: background 0.2s, color 0.2s; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(29,78,216,0.25); color: #93c5fd; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #64748b; text-decoration: none; transition: background 0.2s, color 0.2s; width: 100%; background: none; border: none; cursor: pointer; }
+.logout-btn:hover { background: rgba(255,255,255,0.06); color: #f87171; }
+
+.main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+
+.breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.8rem; font-weight: 500; color: var(--gray-text); }
+.breadcrumb a { color: var(--gray-text); text-decoration: none; }
+.breadcrumb a:hover { color: var(--blue); }
+.breadcrumb span { color: #cbd5e1; }
+
+.lab-header { margin-bottom: 24px; }
+.lab-header .lab-type { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+.type-compulsory { background: var(--blue-light); color: var(--blue); }
+.type-practice { background: #dcfce7; color: #15803d; }
+.type-missed { background: #fef2f2; color: #b91c1c; }
+.lab-header h1 { font-size: 1.4rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+
+.card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.card h2 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+.problem-text { font-size: 0.875rem; font-weight: 400; color: #374151; line-height: 1.75; white-space: pre-wrap; }
+
+.expected-output { background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 0.825rem; font-weight: 400; color: #374151; font-family: monospace; white-space: pre-wrap; margin-top: 16px; }
+
+.code-area { width: 100%; min-height: 280px; padding: 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.855rem; font-family: monospace; color: #0f172a; background: #f9fafb; outline: none; resize: vertical; transition: border-color 0.2s; }
+.code-area:focus { border-color: var(--blue); background: white; }
+
+.btn-submit { width: 100%; padding: 12px; background: var(--blue); color: white; font-size: 0.9rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-top: 14px; }
+.btn-submit:hover { background: #1e40af; }
+.btn-submit:disabled { background: #93c5fd; cursor: not-allowed; }
+
+.result-box { margin-top: 16px; border-radius: 8px; padding: 16px; display: none; }
+.result-pass { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.result-fail { background: #fef2f2; border: 1px solid #fecaca; }
+
+.result-box .score { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+.result-pass .score { color: #15803d; }
+.result-fail .score { color: #b91c1c; }
+
+.result-box .status-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.result-pass .status-label { color: #15803d; }
+.result-fail .status-label { color: #b91c1c; }
+
+.result-box .feedback { font-size: 0.845rem; font-weight: 400; color: #374151; line-height: 1.65; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); }
+
+.submissions-section { margin-top: 20px; }
+.submissions-section h2 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 14px; }
+
+.submission-row { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.submission-row .attempt { font-size: 0.8rem; font-weight: 600; color: var(--gray-text); }
+.submission-row .score { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+.submission-row .date { font-size: 0.78rem; font-weight: 400; color: var(--gray-text); }
+
+.status-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; }
+.status-pass { background: #dcfce7; color: #15803d; }
+.status-fail { background: #fef2f2; color: #b91c1c; }
+
+.reviewed-badge { font-size: 0.68rem; font-weight: 600; color: #0891b2; background: #cffafe; padding: 2px 8px; border-radius: 4px; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">SmartVirtualLab</a>
+  <div class="sidebar-user">
+    <div class="name">{{ session.name }}</div>
+    <div class="meta">Student</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/student/dashboard" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a href="/student/missed-labs" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Missed Labs
+    </a>
+    <a href="/student/progress" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Progress
+    </a>
+    <a href="/student/ask-ai" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      Ask AI
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="breadcrumb">
+    <a href="/student/dashboard">Dashboard</a>
+    <span>/</span>
+    <span>{{ lab.title }}</span>
+  </div>
+
+  <div class="lab-header">
+    <span class="lab-type type-{{ lab.type }}">{{ lab.type | capitalize }}</span>
+    <h1>{{ lab.title }}</h1>
+  </div>
+
+  <div class="content-grid">
+    <div>
+      <div class="card">
+        <h2>Problem Statement</h2>
+        <div class="problem-text">{{ lab.problem_statement }}</div>
+        {% if lab.expected_output %}
+        <div style="margin-top:16px;">
+          <div style="font-size:0.78rem;font-weight:600;color:var(--gray-text);margin-bottom:6px;">Expected Output</div>
+          <div class="expected-output">{{ lab.expected_output }}</div>
+        </div>
+        {% endif %}
+        {% if lab.deadline %}
+        <div style="margin-top:16px;font-size:0.8rem;font-weight:500;color:var(--gray-text);">Deadline: <span style="color:#0f172a;font-weight:600;">{{ lab.deadline }}</span></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Submit Your Code</h2>
+        <textarea class="code-area" id="code-input" placeholder="Write your code here..."></textarea>
+        <button class="btn-submit" id="submit-btn" onclick="submitCode()">Submit Code</button>
+        <div class="result-box" id="result-box">
+          <div class="status-label" id="result-status"></div>
+          <div class="score" id="result-score"></div>
+          <div class="feedback" id="result-feedback"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if submissions %}
+  <div class="submissions-section">
+    <h2>Your Previous Submissions</h2>
+    {% for sub in submissions %}
+    <div class="submission-row">
+      <div>
+        <div class="attempt">Attempt {{ sub.attempt }}</div>
+        <div class="date">{{ sub.submitted_at }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        {% if sub.faculty_reviewed %}
+        <span class="reviewed-badge">Faculty Reviewed</span>
+        {% endif %}
+        <span class="score">{{ sub.score }}/100</span>
+        <span class="status-badge {{ 'status-pass' if sub.status == 'Pass' else 'status-fail' }}">{{ sub.status }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  const labId = "{{ lab._id }}";
+
+  function submitCode() {
+    const code = document.getElementById('code-input').value.trim();
+    if (!code) { alert('Please write your code before submitting.'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Evaluating...';
+
+    fetch('/student/lab/' + labId + '/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'code=' + encodeURIComponent(code)
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Submit Code';
+
+      const resultBox = document.getElementById('result-box');
+      const resultStatus = document.getElementById('result-status');
+      const resultScore = document.getElementById('result-score');
+      const resultFeedback = document.getElementById('result-feedback');
+
+      resultBox.style.display = 'block';
+
+      if (data.success) {
+        resultBox.className = 'result-box ' + (data.status === 'Pass' ? 'result-pass' : 'result-fail');
+        resultStatus.textContent = data.status + ' — Attempt ' + data.attempt;
+        resultScore.textContent = data.score + ' / 100';
+        resultFeedback.textContent = data.feedback;
+      } else {
+        resultBox.className = 'result-box result-fail';
+        resultStatus.textContent = 'Error';
+        resultScore.textContent = '';
+        resultFeedback.textContent = data.message;
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Submit Code';
+      alert('Something went wrong. Please try again.');
+    });
+  }
+</script>
+
+</body>
+</html>

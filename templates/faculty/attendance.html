@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Attendance — SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-style: normal; background: #f3f4f6; color: #111827; }
+h1,h2,h3,h4,h5,p,span,a,li,div { font-style: normal; }
+:root { --blue: #1d4ed8; --blue-light: #dbeafe; --border: #e5e7eb; --gray-text: #6b7280; }
+
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: #0f172a; display: flex; flex-direction: column; z-index: 50; }
+.sidebar-logo { padding: 24px 24px 20px; font-size: 1rem; font-weight: 800; color: white; letter-spacing: -0.02em; text-decoration: none; display: block; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user .name { font-size: 0.855rem; font-weight: 700; color: white; }
+.sidebar-user .meta { font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #94a3b8; text-decoration: none; transition: background 0.2s, color 0.2s; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(29,78,216,0.25); color: #93c5fd; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #64748b; text-decoration: none; transition: background 0.2s, color 0.2s; width: 100%; background: none; border: none; cursor: pointer; }
+.logout-btn:hover { background: rgba(255,255,255,0.06); color: #f87171; }
+
+.main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.page-header p { font-size: 0.875rem; font-weight: 400; color: var(--gray-text); margin-top: 4px; }
+
+.filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+.filter-bar select { padding: 9px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.855rem; font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; background: white; outline: none; transition: border-color 0.2s; }
+.filter-bar select:focus { border-color: var(--blue); }
+.btn-filter { padding: 9px 20px; background: var(--blue); color: white; font-size: 0.855rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+.btn-filter:hover { background: #1e40af; }
+
+.card { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); background: #f9fafb; display: flex; align-items: center; justify-content: space-between; }
+.card-header h2 { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+
+.mark-section { padding: 20px; border-bottom: 1px solid var(--border); }
+.mark-section h3 { font-size: 0.855rem; font-weight: 700; color: #0f172a; margin-bottom: 14px; }
+
+.student-attend-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.student-attend-row:last-child { border-bottom: none; }
+.student-info .s-name { font-size: 0.875rem; font-weight: 600; color: #0f172a; }
+.student-info .s-id { font-size: 0.75rem; font-weight: 400; color: var(--gray-text); }
+
+.status-toggle { display: flex; gap: 6px; }
+.toggle-btn { padding: 5px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; border: 1.5px solid var(--border); background: white; cursor: pointer; transition: all 0.15s; }
+.toggle-btn.present.selected { background: #dcfce7; border-color: #86efac; color: #15803d; }
+.toggle-btn.absent.selected { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+.toggle-btn:not(.selected) { color: var(--gray-text); }
+
+.btn-save { margin: 16px 20px 20px; padding: 10px 24px; background: var(--blue); color: white; font-size: 0.855rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+.btn-save:hover { background: #1e40af; }
+.btn-save:disabled { background: #93c5fd; cursor: not-allowed; }
+
+.attend-table { width: 100%; border-collapse: collapse; }
+.attend-table th { font-size: 0.75rem; font-weight: 700; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); background: #f9fafb; }
+.attend-table td { font-size: 0.855rem; padding: 12px 16px; border-bottom: 1px solid var(--border); color: #374151; }
+.attend-table tr:last-child td { border-bottom: none; }
+
+.status-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; display: inline-block; }
+.status-present { background: #dcfce7; color: #15803d; }
+.status-absent { background: #fef2f2; color: #b91c1c; }
+.status-virtual { background: #fffbeb; color: #92400e; }
+
+.success-toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: white; padding: 12px 20px; border-radius: 10px; font-size: 0.855rem; font-weight: 600; display: none; z-index: 999; }
+
+.empty-state { padding: 40px; text-align: center; color: var(--gray-text); font-size: 0.875rem; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">SmartVirtualLab</a>
+  <div class="sidebar-user">
+    <div class="name">{{ session.name }}</div>
+    <div class="meta">Faculty</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/faculty/dashboard" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a href="/faculty/assign-labs" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Assign Labs
+    </a>
+    <a href="/faculty/attendance" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Attendance
+    </a>
+    <a href="/faculty/submissions" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Submissions
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <h1>Attendance</h1>
+    <p>Select a lab to mark or view student attendance.</p>
+  </div>
+
+  <div class="filter-bar">
+    <select id="lab-select" onchange="loadAttendance()">
+      <option value="">Select a lab</option>
+      {% for lab in labs %}
+      <option value="{{ lab._id }}" {% if request.args.get('lab_id') == lab._id %}selected{% endif %}>
+        {{ lab.title }} (Sem {{ lab.semester }})
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  {% if attendance %}
+  <div class="card">
+    <div class="card-header">
+      <h2>Current Attendance Records</h2>
+      <span style="font-size:0.78rem;font-weight:500;color:var(--gray-text);">{{ attendance | length }} students</span>
+    </div>
+    <table class="attend-table">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Student ID</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in attendance %}
+        <tr>
+          <td style="font-weight:600;color:#0f172a;">{{ record.student_name }}</td>
+          <td>{{ record.student_id_display }}</td>
+          <td>
+            <span class="status-badge
+              {% if record.status == 'Present' %}status-present
+              {% elif record.status == 'Absent' %}status-absent
+              {% else %}status-virtual{% endif %}">
+              {{ record.status }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="card" id="mark-card">
+    <div class="card-header">
+      <h2>Mark Attendance</h2>
+    </div>
+    <div class="mark-section" id="mark-section">
+      <div id="students-list">
+        <div class="empty-state">Select a lab above to load the student list and mark attendance.</div>
+      </div>
+    </div>
+    <button class="btn-save" id="save-btn" onclick="saveAttendance()" style="display:none;">Save Attendance</button>
+  </div>
+</div>
+
+<div class="success-toast" id="toast">Attendance saved successfully</div>
+
+<script>
+  const attendanceMap = {};
+  let selectedLabId = document.getElementById('lab-select').value;
+
+  function loadAttendance() {
+    selectedLabId = document.getElementById('lab-select').value;
+    if (!selectedLabId) return;
+
+    fetch('/faculty/attendance/students?lab_id=' + selectedLabId)
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('students-list');
+        const saveBtn = document.getElementById('save-btn');
+
+        if (!data.students || data.students.length === 0) {
+          list.innerHTML = '<div class="empty-state">No students found for this lab semester.</div>';
+          saveBtn.style.display = 'none';
+          return;
+        }
+
+        saveBtn.style.display = 'inline-block';
+        list.innerHTML = '';
+
+        data.students.forEach(student => {
+          attendanceMap[student._id] = 'Present';
+          list.innerHTML += `
+            <div class="student-attend-row">
+              <div class="student-info">
+                <div class="s-name">${student.name}</div>
+                <div class="s-id">${student.student_id}</div>
+              </div>
+              <div class="status-toggle">
+                <button class="toggle-btn present selected" id="present-${student._id}" onclick="setStatus('${student._id}', 'Present')">Present</button>
+                <button class="toggle-btn absent" id="absent-${student._id}" onclick="setStatus('${student._id}', 'Absent')">Absent</button>
+              </div>
+            </div>`;
+        });
+      })
+      .catch(() => {
+        document.getElementById('students-list').innerHTML = '<div class="empty-state">Failed to load students. Please try again.</div>';
+      });
+  }
+
+  function setStatus(studentId, status) {
+    attendanceMap[studentId] = status;
+    const presentBtn = document.getElementById('present-' + studentId);
+    const absentBtn = document.getElementById('absent-' + studentId);
+    if (status === 'Present') {
+      presentBtn.classList.add('selected');
+      absentBtn.classList.remove('selected');
+    } else {
+      absentBtn.classList.add('selected');
+      presentBtn.classList.remove('selected');
+    }
+  }
+
+  function saveAttendance() {
+    if (!selectedLabId) return;
+
+    const records = Object.entries(attendanceMap).map(([student_id, status]) => ({
+      student_id, lab_id: selectedLabId, status
+    }));
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    fetch('/faculty/attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ records })
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Save Attendance';
+      if (data.success) {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; location.reload(); }, 1500);
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Save Attendance';
+    });
+  }
+
+  if (selectedLabId) loadAttendance();
+</script>
+
+</body>
+</html>

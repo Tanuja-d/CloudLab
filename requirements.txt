@@ -1,0 +1,7 @@
+flask==3.0.3
+flask-pymongo==2.3.0
+pymongo==4.7.2
+werkzeug==3.0.3
+google-generativeai==0.7.2
+dnspython==2.6.1
+gunicorn==22.0.0

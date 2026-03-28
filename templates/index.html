@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-style: normal;
+  color: #111827;
+  background: #ffffff;
+  overflow-x: hidden;
+}
+
+:root {
+  --blue: #1d4ed8;
+  --blue-mid: #2563eb;
+  --blue-light: #dbeafe;
+  --cyan: #0891b2;
+  --cyan-light: #cffafe;
+  --gray-text: #6b7280;
+  --gray-light: #f3f4f6;
+  --border: #e5e7eb;
+}
+
+h1, h2, h3, h4, h5, p, span, a, li, div { font-style: normal; }
+
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--blue);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-text);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--blue); }
+
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn-ghost {
+  font-size: 0.855rem;
+  font-weight: 600;
+  color: var(--blue);
+  background: transparent;
+  border: 1.5px solid var(--blue);
+  padding: 8px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-ghost:hover { background: var(--blue); color: white; }
+
+.btn-solid {
+  font-size: 0.855rem;
+  font-weight: 600;
+  color: white;
+  background: var(--blue);
+  padding: 8px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-solid:hover { background: #1e40af; }
+
+.hero {
+  padding: 140px 40px 100px;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.hero-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  background: var(--cyan-light);
+  padding: 4px 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 2.9rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.hero h1 span { color: var(--blue); }
+
+.hero p {
+  font-size: 0.975rem;
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--gray-text);
+  margin-bottom: 32px;
+  max-width: 440px;
+}
+
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn-hero {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  background: var(--blue);
+  padding: 12px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+}
+.btn-hero:hover { background: #1e40af; transform: translateY(-1px); }
+
+.btn-hero-ghost {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  background: var(--gray-light);
+  padding: 12px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-hero-ghost:hover { background: #e5e7eb; }
+
+.hero-meta {
+  display: flex;
+  gap: 28px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.hero-meta-item .value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+.hero-meta-item .label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--gray-text);
+  margin-top: 2px;
+}
+
+.hero-visual { position: relative; }
+
+.hero-img-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+  aspect-ratio: 4/3;
+}
+.hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.hero-badge {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-badge-score { bottom: -20px; left: -24px; min-width: 180px; }
+
+.hero-badge-progress {
+  top: -16px;
+  right: -20px;
+  min-width: 160px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.badge-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--blue-light);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-text .top { font-size: 0.7rem; font-weight: 500; color: var(--gray-text); }
+.badge-text .bottom { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+
+.progress-bar-wrap { width: 100%; }
+.progress-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 5px;
+}
+.progress-bar-track { width: 100%; height: 6px; background: #e5e7eb; border-radius: 99px; }
+.progress-bar-fill { height: 6px; background: var(--blue); border-radius: 99px; width: 78%; }
+
+.stats-strip { background: #0f172a; padding: 48px 40px; }
+
+.stats-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stat-item {
+  padding: 36px 28px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.stat-item:last-child { border-right: none; }
+.stat-item .num { font-size: 2.2rem; font-weight: 800; color: white; letter-spacing: -0.03em; }
+.stat-item .desc { font-size: 0.82rem; font-weight: 500; color: #64748b; margin-top: 4px; }
+
+.section-wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+.section-label {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 12px;
+}
+.section-title {
+  font-size: 1.9rem; font-weight: 800;
+  letter-spacing: -0.025em; color: #0f172a;
+  line-height: 1.25; margin-bottom: 14px;
+}
+.section-sub {
+  font-size: 0.925rem; font-weight: 400;
+  color: var(--gray-text); line-height: 1.7;
+  max-width: 500px;
+}
+
+.features-section { padding: 96px 40px; background: #f9fafb; }
+.features-header { max-width: 1100px; margin: 0 auto 52px; }
+
+.features-grid {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+
+.feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.feature-card:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.07); transform: translateY(-3px); }
+
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--blue-light);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+
+.feature-card h3 { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+.feature-card p { font-size: 0.855rem; font-weight: 400; color: var(--gray-text); line-height: 1.65; }
+
+.hiw-section { padding: 96px 40px; background: white; }
+
+.hiw-grid {
+  max-width: 1100px; margin: 52px auto 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 72px; align-items: center;
+}
+
+.steps-list { display: flex; flex-direction: column; gap: 14px; }
+
+.step-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.step-item:hover { border-color: #bfdbfe; box-shadow: 0 4px 16px rgba(29,78,216,0.06); }
+
+.step-num {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: white;
+  font-size: 0.8rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-text h4 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.step-text p { font-size: 0.825rem; font-weight: 400; color: var(--gray-text); line-height: 1.6; }
+
+.hiw-img { border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.10); aspect-ratio: 3/4; }
+.hiw-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.roles-section { padding: 96px 40px; background: #f9fafb; }
+
+.roles-grid {
+  max-width: 1100px; margin: 52px auto 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+}
+
+.role-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.role-img { height: 200px; overflow: hidden; }
+.role-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.role-body { padding: 28px; }
+
+.role-tag {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--blue); background: var(--blue-light);
+  padding: 3px 10px; border-radius: 4px; margin-bottom: 12px;
+}
+
+.role-body h3 { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; }
+
+.role-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.role-list li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.855rem; font-weight: 400; color: #374151;
+}
+
+.check-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.role-btn {
+  display: inline-block; margin-top: 20px;
+  font-size: 0.855rem; font-weight: 700;
+  color: white; background: var(--blue);
+  padding: 10px 22px; border-radius: 8px;
+  text-decoration: none; transition: background 0.2s;
+}
+.role-btn:hover { background: #1e40af; }
+
+.about-section { padding: 96px 40px; background: white; }
+
+.about-grid {
+  max-width: 1100px; margin: 52px auto 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 72px; align-items: center;
+}
+
+.about-img { border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.10); aspect-ratio: 4/3; }
+.about-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.about-text p {
+  font-size: 0.925rem; font-weight: 400;
+  color: var(--gray-text); line-height: 1.75; margin-bottom: 14px;
+}
+
+.tech-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+
+.tech-tag {
+  font-size: 0.78rem; font-weight: 600;
+  color: #374151; background: var(--gray-light);
+  border: 1px solid var(--border);
+  padding: 5px 14px; border-radius: 6px;
+}
+
+.cta-section { background: var(--blue); padding: 80px 40px; text-align: center; }
+.cta-section h2 { font-size: 1.9rem; font-weight: 800; color: white; letter-spacing: -0.025em; margin-bottom: 12px; }
+.cta-section p { font-size: 0.95rem; font-weight: 400; color: #bfdbfe; margin-bottom: 32px; }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.btn-cta-white {
+  font-size: 0.9rem; font-weight: 700;
+  color: var(--blue); background: white;
+  padding: 12px 28px; border-radius: 8px;
+  text-decoration: none; transition: background 0.2s;
+}
+.btn-cta-white:hover { background: #eff6ff; }
+
+.btn-cta-outline {
+  font-size: 0.9rem; font-weight: 600;
+  color: white; background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  padding: 12px 28px; border-radius: 8px;
+  text-decoration: none; transition: border-color 0.2s, background 0.2s;
+}
+.btn-cta-outline:hover { border-color: white; background: rgba(255,255,255,0.08); }
+
+footer { background: #0f172a; padding: 56px 40px 32px; }
+
+.footer-grid {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  gap: 48px; padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.footer-brand .logo-footer {
+  font-size: 1rem; font-weight: 800;
+  color: white; letter-spacing: -0.02em; margin-bottom: 10px;
+}
+.footer-brand p { font-size: 0.845rem; font-weight: 400; color: #64748b; line-height: 1.65; }
+
+.footer-col h5 {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #94a3b8; margin-bottom: 16px;
+}
+.footer-col a {
+  display: block; font-size: 0.845rem; font-weight: 400;
+  color: #64748b; text-decoration: none;
+  margin-bottom: 10px; transition: color 0.2s;
+}
+.footer-col a:hover { color: white; }
+
+.footer-bottom {
+  max-width: 1100px; margin: 28px auto 0;
+  font-size: 0.8rem; font-weight: 400;
+  color: #475569; text-align: center;
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; gap: 40px; padding: 100px 24px 60px; }
+  .hero-visual { display: none; }
+  .hero h1 { font-size: 2rem; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .hiw-grid { grid-template-columns: 1fr; }
+  .roles-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">SmartVirtualLab</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#roles">Roles</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="/login" class="btn-ghost">Login</a>
+    <a href="/signup" class="btn-solid">Sign Up</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-label">Virtual Lab Platform</span>
+    <h1>Your semester labs,<br/><span>done smarter.</span></h1>
+    <p>SmartVirtualLab lets engineering students complete labs online, get AI-evaluated scores, recover missed sessions, and track semester progress — all in one place.</p>
+    <div class="hero-actions">
+      <a href="/signup" class="btn-hero">Get Started</a>
+      <a href="#how-it-works" class="btn-hero-ghost">How It Works</a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="value">2</div>
+        <div class="label">User Roles</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="value">AI</div>
+        <div class="label">Code Evaluation</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="value">60%</div>
+        <div class="label">Pass Threshold</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-wrap">
+      <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80" alt="Student working on virtual lab"/>
+    </div>
+    <div class="hero-badge hero-badge-score">
+      <div class="badge-icon">
+        <svg width="18" height="18" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="badge-text">
+        <div class="top">Lab Submitted</div>
+        <div class="bottom">Score: 92 / 100</div>
+      </div>
+    </div>
+    <div class="hero-badge hero-badge-progress">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-label">
+          <span>Semester Progress</span>
+          <span>78%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stats-strip">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="num">8+</div>
+      <div class="desc">Semesters Supported</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">AI</div>
+      <div class="desc">Gemini-Powered Evaluation</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">60%</div>
+      <div class="desc">Lab Completion to Pass</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">2</div>
+      <div class="desc">Student and Faculty Roles</div>
+    </div>
+  </div>
+</div>
+
+<section id="features" class="features-section">
+  <div class="features-header fade-in">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Built for the way engineering<br/>students actually study</h2>
+    <p class="section-sub">From lab submission to semester promotion — every step is tracked, evaluated, and automated.</p>
+  </div>
+  <div class="features-grid fade-in">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      </div>
+      <h3>Semester Lab Management</h3>
+      <p>Labs are automatically assigned based on your semester and branch. Open your dashboard and they are already there — no manual setup required.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <h3>AI Code Evaluation</h3>
+      <p>Submit your code and get a score out of 100 instantly. Google Gemini evaluates correctness, approach, and attempt number — all without manual grading.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <h3>Progress Dashboard</h3>
+      <p>Your dashboard shows compulsory labs, practice labs, scores, attendance, and your live semester promotion status — all fetched from the database in real time.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <h3>Missed Lab Recovery</h3>
+      <p>Marked absent for a session? Missed labs appear in a separate tab. Submit before the deadline and your attendance updates automatically to Present (Virtual).</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      </div>
+      <h3>Ask AI Learning Mode</h3>
+      <p>Generate MCQs from lab content at any difficulty level. Ask doubts and get answers pulled directly from your lab material — not from the open internet.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      </div>
+      <h3>Semester Promotion</h3>
+      <p>Pass 60% or more of compulsory labs and your semester status updates automatically. No manual verification — the system handles it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works" class="hiw-section">
+  <div class="section-wrap">
+    <div class="fade-in">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Four steps from signup<br/>to semester cleared</h2>
+    </div>
+    <div class="hiw-grid fade-in">
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>Sign Up and Login</h4>
+            <p>Register with your Student ID, semester, and branch. Faculty uses a separate registration path. After login you land directly on your personal dashboard.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>View Your Assigned Labs</h4>
+            <p>Your dashboard automatically loads all labs for your semester — compulsory, practice, and missed labs — pulled live from the database every time you log in.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>Submit Code and Get Scored</h4>
+            <p>Open a lab, read the problem statement, type your code, and submit. Gemini evaluates it and returns your score, feedback, and pass or fail status immediately.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <h4>Get Promoted to Next Semester</h4>
+            <p>Once 60% of compulsory labs are passed, your semester status updates automatically. You see it on your dashboard — Passed and eligible for the next semester.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hiw-img">
+        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=700&q=80" alt="Student studying"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="roles" class="roles-section">
+  <div class="section-wrap">
+    <div class="fade-in">
+      <div class="section-label">Roles</div>
+      <h2 class="section-title">One platform, two roles</h2>
+      <p class="section-sub">Students and faculty each get their own dashboard and workflow — designed specifically for how they use the system.</p>
+    </div>
+    <div class="roles-grid fade-in">
+      <div class="role-card">
+        <div class="role-img">
+          <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=700&q=80" alt="Student" style="object-position: center center;"/>
+        </div>
+        <div class="role-body">
+          <span class="role-tag">Student</span>
+          <h3>For Engineering Students</h3>
+          <ul class="role-list">
+            <li><span class="check-dot"><svg width="10" height="10" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>View all semester-assigned labs</li>
+            <li><span class="check-dot"><svg width="10" height="10" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Submit code and receive an AI score instantly</li>
+            <li><span class="check-dot"><svg width="10" height="10" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Recover missed lab sessions virtually</li>
+            <li><span class="check-dot"><svg width="10" height="10" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Track progress and semester eligibility</li>
+            <li><span class="check-dot"><svg width="10" height="10" fill="none" stroke="#1d4ed8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Generate MCQs and ask AI doubts</li>
+          </ul>
+          <a href="/signup" class="role-btn">Sign Up as Student</a>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="role-img">
+          <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=700&q=80" alt="Faculty" style="object-position: center center;"/>
+        </div>
+        <div class="role-body">
+          <span class="role-tag" style="color:var(--cyan);background:var(--cyan-light);">Faculty</span>
+          <h3>For Lab Faculty</h3>
+          <ul class="role-list">
+            <li><span class="check-dot" style="background:var(--cyan-light);"><svg width="10" height="10" fill="none" stroke="#0891b2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Create and assign labs to semester batches</li>
+            <li><span class="check-dot" style="background:var(--cyan-light);"><svg width="10" height="10" fill="none" stroke="#0891b2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Mark attendance per lab session</li>
+            <li><span class="check-dot" style="background:var(--cyan-light);"><svg width="10" height="10" fill="none" stroke="#0891b2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Review AI-evaluated student submissions</li>
+            <li><span class="check-dot" style="background:var(--cyan-light);"><svg width="10" height="10" fill="none" stroke="#0891b2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Override or confirm Gemini scores</li>
+            <li><span class="check-dot" style="background:var(--cyan-light);"><svg width="10" height="10" fill="none" stroke="#0891b2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Monitor all student semester progress</li>
+          </ul>
+          <a href="/signup" class="role-btn" style="background:var(--cyan);">Sign Up as Faculty</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="about-section">
+  <div class="section-wrap">
+    <div class="about-grid fade-in">
+      <div class="about-img">
+        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&q=80" alt="Platform overview"/>
+      </div>
+      <div class="about-text">
+        <div class="section-label">About</div>
+        <h2 class="section-title">What is SmartVirtualLab?</h2>
+        <p>SmartVirtualLab is a cloud-based virtual lab ecosystem built for engineering colleges. It replaces paper-based lab records and manual evaluation with a fully digital, AI-assisted workflow.</p>
+        <p>Students submit code directly on the platform. Faculty assigns labs, marks attendance, and reviews scores. Google Gemini evaluates every submission automatically — making the process faster and more consistent.</p>
+        <p>The system tracks each student's progress in real time and automatically determines semester promotion eligibility based on lab completion percentage.</p>
+        <div class="tech-tags">
+          <span class="tech-tag">Python Flask</span>
+          <span class="tech-tag">MongoDB Atlas</span>
+          <span class="tech-tag">Google Gemini AI</span>
+          <span class="tech-tag">Tailwind CSS</span>
+          <span class="tech-tag">Rule-Based Scoring</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Start using SmartVirtualLab today</h2>
+  <p>Sign up as a student or faculty and take control of your lab sessions.</p>
+  <div class="cta-actions">
+    <a href="/signup" class="btn-cta-white">Create Account</a>
+    <a href="/login" class="btn-cta-outline">Login</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo-footer">SmartVirtualLab</div>
+      <p>A cloud-based virtual lab ecosystem for continuous learning, semester evaluation, and career readiness — built for engineering students and faculty.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Platform</h5>
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#roles">Roles</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="footer-col">
+      <h5>Access</h5>
+      <a href="/login">Student Login</a>
+      <a href="/login">Faculty Login</a>
+      <a href="/signup">Create Account</a>
+    </div>
+  </div>
+  <div class="footer-bottom">SmartVirtualLab &copy; 2025. All rights reserved.</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

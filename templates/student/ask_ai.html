@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ask AI — SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-style: normal; background: #f3f4f6; color: #111827; }
+h1,h2,h3,h4,h5,p,span,a,li,div { font-style: normal; }
+:root { --blue: #1d4ed8; --blue-light: #dbeafe; --border: #e5e7eb; --gray-text: #6b7280; }
+
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: #0f172a; display: flex; flex-direction: column; z-index: 50; }
+.sidebar-logo { padding: 24px 24px 20px; font-size: 1rem; font-weight: 800; color: white; letter-spacing: -0.02em; text-decoration: none; display: block; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user .name { font-size: 0.855rem; font-weight: 700; color: white; }
+.sidebar-user .meta { font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #94a3b8; text-decoration: none; transition: background 0.2s, color 0.2s; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(29,78,216,0.25); color: #93c5fd; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #64748b; text-decoration: none; transition: background 0.2s, color 0.2s; width: 100%; background: none; border: none; cursor: pointer; }
+.logout-btn:hover { background: rgba(255,255,255,0.06); color: #f87171; }
+
+.main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.page-header p { font-size: 0.875rem; font-weight: 400; color: var(--gray-text); margin-top: 4px; }
+
+.tabs { display: flex; gap: 4px; background: white; border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; margin-bottom: 24px; }
+.tab-btn { padding: 8px 20px; border-radius: 7px; font-size: 0.855rem; font-weight: 600; color: var(--gray-text); background: transparent; border: none; cursor: pointer; transition: background 0.2s, color 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.tab-btn.active { background: var(--blue); color: white; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.card h2 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.825rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group select, .form-group input, .form-group textarea {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 0.875rem; font-weight: 400; font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #0f172a; background: white; outline: none; transition: border-color 0.2s;
+}
+.form-group select:focus, .form-group input:focus, .form-group textarea:focus { border-color: var(--blue); }
+.form-group textarea { resize: vertical; min-height: 100px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.btn-ai { padding: 11px 28px; background: var(--blue); color: white; font-size: 0.875rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+.btn-ai:hover { background: #1e40af; }
+.btn-ai:disabled { background: #93c5fd; cursor: not-allowed; }
+
+.mcq-list { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+
+.mcq-item { background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+.mcq-item .question { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+.mcq-item .options { display: flex; flex-direction: column; gap: 7px; }
+.mcq-item .option { font-size: 0.845rem; font-weight: 400; color: #374151; padding: 7px 12px; border-radius: 6px; background: white; border: 1px solid var(--border); }
+.mcq-item .option.correct { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; font-weight: 600; }
+.mcq-item .answer-row { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; color: var(--blue); }
+.mcq-item .explanation { font-size: 0.8rem; font-weight: 400; color: var(--gray-text); margin-top: 4px; }
+
+.doubt-result { background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-top: 20px; display: none; }
+.doubt-result .answer-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--blue); margin-bottom: 8px; }
+.doubt-result .answer-text { font-size: 0.9rem; font-weight: 400; color: #0f172a; line-height: 1.7; }
+.doubt-result .explanation-text { font-size: 0.845rem; font-weight: 400; color: #374151; line-height: 1.65; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.not-found { background: #fffbeb; border-color: #fde68a; }
+.not-found .answer-label { color: #92400e; }
+
+.loading { text-align: center; padding: 24px; color: var(--gray-text); font-size: 0.875rem; display: none; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">SmartVirtualLab</a>
+  <div class="sidebar-user">
+    <div class="name">{{ session.name }}</div>
+    <div class="meta">Student</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/student/dashboard" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a href="/student/missed-labs" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Missed Labs
+    </a>
+    <a href="/student/progress" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Progress
+    </a>
+    <a href="/student/ask-ai" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      Ask AI
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <h1>Ask AI</h1>
+    <p>Generate practice questions or ask doubts based on your lab content.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('mcq')">Generate MCQs</button>
+    <button class="tab-btn" onclick="switchTab('doubt')">Ask a Doubt</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-mcq">
+    <div class="card">
+      <h2>Generate MCQ Questions</h2>
+      <div class="form-group">
+        <label>Select Lab</label>
+        <select id="mcq-lab">
+          <option value="">Choose a lab</option>
+          {% for lab in labs.compulsory + labs.practice %}
+          <option value="{{ lab._id }}">{{ lab.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Number of Questions</label>
+          <select id="mcq-num">
+            <option value="3">3 Questions</option>
+            <option value="5" selected>5 Questions</option>
+            <option value="10">10 Questions</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Difficulty Level</label>
+          <select id="mcq-difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-ai" id="mcq-btn" onclick="generateMCQ()">Generate Questions</button>
+    </div>
+
+    <div class="loading" id="mcq-loading">Generating questions from lab content...</div>
+    <div class="mcq-list" id="mcq-list"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-doubt">
+    <div class="card">
+      <h2>Ask a Doubt</h2>
+      <div class="form-group">
+        <label>Select Lab</label>
+        <select id="doubt-lab">
+          <option value="">Choose a lab</option>
+          {% for lab in labs.compulsory + labs.practice %}
+          <option value="{{ lab._id }}">{{ lab.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Your Question</label>
+        <textarea id="doubt-question" placeholder="Type your question about this lab..."></textarea>
+      </div>
+      <button class="btn-ai" id="doubt-btn" onclick="askDoubt()">Get Answer</button>
+    </div>
+
+    <div class="loading" id="doubt-loading">Finding answer from lab material...</div>
+    <div class="doubt-result" id="doubt-result">
+      <div class="answer-label" id="doubt-label">Answer</div>
+      <div class="answer-text" id="doubt-answer"></div>
+      <div class="explanation-text" id="doubt-explanation"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function generateMCQ() {
+    const labId = document.getElementById('mcq-lab').value;
+    const num = document.getElementById('mcq-num').value;
+    const difficulty = document.getElementById('mcq-difficulty').value;
+
+    if (!labId) { alert('Please select a lab first.'); return; }
+
+    const btn = document.getElementById('mcq-btn');
+    const loading = document.getElementById('mcq-loading');
+    const list = document.getElementById('mcq-list');
+
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    loading.style.display = 'block';
+    list.innerHTML = '';
+
+    fetch('/student/ask-ai/mcq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lab_id: labId, num_questions: num, difficulty: difficulty })
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Generate Questions';
+      loading.style.display = 'none';
+
+      if (data.success && data.data.questions) {
+        data.data.questions.forEach((q, i) => {
+          const correct = q.correct_answer.charAt(0);
+          const optionsHtml = q.options.map(opt => {
+            const isCorrect = opt.startsWith(correct + '.');
+            return `<div class="option ${isCorrect ? 'correct' : ''}">${opt}</div>`;
+          }).join('');
+
+          list.innerHTML += `
+            <div class="mcq-item">
+              <div class="question">${i + 1}. ${q.question}</div>
+              <div class="options">${optionsHtml}</div>
+              <div class="answer-row">Correct Answer: ${q.correct_answer}</div>
+              <div class="explanation">${q.explanation}</div>
+            </div>`;
+        });
+      } else {
+        list.innerHTML = '<div style="text-align:center;color:#b91c1c;padding:20px;font-size:0.875rem;">' + (data.message || 'Failed to generate. Please try again.') + '</div>';
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Generate Questions';
+      loading.style.display = 'none';
+      alert('Something went wrong. Please try again.');
+    });
+  }
+
+  function askDoubt() {
+    const labId = document.getElementById('doubt-lab').value;
+    const question = document.getElementById('doubt-question').value.trim();
+
+    if (!labId) { alert('Please select a lab first.'); return; }
+    if (!question) { alert('Please type your question.'); return; }
+
+    const btn = document.getElementById('doubt-btn');
+    const loading = document.getElementById('doubt-loading');
+    const result = document.getElementById('doubt-result');
+
+    btn.disabled = true;
+    btn.textContent = 'Finding Answer...';
+    loading.style.display = 'block';
+    result.style.display = 'none';
+
+    fetch('/student/ask-ai/doubt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lab_id: labId, question: question })
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Get Answer';
+      loading.style.display = 'none';
+      result.style.display = 'block';
+
+      if (data.success && data.data) {
+        const found = data.data.found_in_material;
+        result.className = 'doubt-result' + (found ? '' : ' not-found');
+        document.getElementById('doubt-label').textContent = found ? 'Answer' : 'Not Found in Lab Material';
+        document.getElementById('doubt-answer').textContent = data.data.answer;
+        document.getElementById('doubt-explanation').textContent = data.data.explanation || '';
+      } else {
+        result.className = 'doubt-result not-found';
+        document.getElementById('doubt-label').textContent = 'Error';
+        document.getElementById('doubt-answer').textContent = data.message || 'Failed to get answer. Please try again.';
+        document.getElementById('doubt-explanation').textContent = '';
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Get Answer';
+      loading.style.display = 'none';
+      alert('Something went wrong. Please try again.');
+    });
+  }
+</script>
+
+</body>
+</html>

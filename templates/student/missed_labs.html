@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Missed Labs — SmartVirtualLab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-style: normal; background: #f3f4f6; color: #111827; }
+h1,h2,h3,h4,h5,p,span,a,li,div { font-style: normal; }
+:root { --blue: #1d4ed8; --blue-light: #dbeafe; --border: #e5e7eb; --gray-text: #6b7280; }
+
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: #0f172a; display: flex; flex-direction: column; z-index: 50; }
+.sidebar-logo { padding: 24px 24px 20px; font-size: 1rem; font-weight: 800; color: white; letter-spacing: -0.02em; text-decoration: none; display: block; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-user .name { font-size: 0.855rem; font-weight: 700; color: white; }
+.sidebar-user .meta { font-size: 0.75rem; font-weight: 400; color: #64748b; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #94a3b8; text-decoration: none; transition: background 0.2s, color 0.2s; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(29,78,216,0.25); color: #93c5fd; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.855rem; font-weight: 500; color: #64748b; text-decoration: none; transition: background 0.2s, color 0.2s; width: 100%; background: none; border: none; cursor: pointer; }
+.logout-btn:hover { background: rgba(255,255,255,0.06); color: #f87171; }
+
+.main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.page-header p { font-size: 0.875rem; font-weight: 400; color: var(--gray-text); margin-top: 4px; }
+
+.info-banner { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; font-size: 0.855rem; font-weight: 500; color: #92400e; }
+
+.missed-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+
+.missed-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+
+.missed-card .lab-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+
+.missed-card .lab-meta { font-size: 0.8rem; font-weight: 400; color: var(--gray-text); margin-bottom: 16px; }
+
+.status-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
+.status-absent { background: #fef2f2; color: #b91c1c; }
+.status-virtual { background: #fffbeb; color: #92400e; }
+
+.btn-open { display: block; width: 100%; padding: 10px; background: var(--blue); color: white; font-size: 0.855rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; border: none; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.2s; }
+.btn-open:hover { background: #1e40af; }
+.btn-open.submitted { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; cursor: default; }
+
+.empty-state { background: white; border: 1px dashed var(--border); border-radius: 12px; padding: 60px 36px; text-align: center; }
+.empty-state .icon { font-size: 2rem; margin-bottom: 12px; }
+.empty-state h3 { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+.empty-state p { font-size: 0.855rem; font-weight: 400; color: var(--gray-text); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">SmartVirtualLab</a>
+  <div class="sidebar-user">
+    <div class="name">{{ session.name }}</div>
+    <div class="meta">Student</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/student/dashboard" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a href="/student/missed-labs" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Missed Labs
+    </a>
+    <a href="/student/progress" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Progress
+    </a>
+    <a href="/student/ask-ai" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      Ask AI
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <h1>Missed Labs</h1>
+    <p>Labs where you were marked absent. Submit them virtually before the deadline to recover attendance.</p>
+  </div>
+
+  {% if missed %}
+  <div class="info-banner">
+    You have {{ missed | length }} missed lab{{ 's' if missed | length > 1 else '' }}. Submit each one before the deadline to update your attendance to Present (Virtual).
+  </div>
+
+  <div class="missed-grid">
+    {% for item in missed %}
+    <div class="missed-card">
+      {% if item.submission %}
+      <span class="status-badge status-virtual">Submitted Virtually</span>
+      {% else %}
+      <span class="status-badge status-absent">Absent</span>
+      {% endif %}
+      <div class="lab-title">{{ item.lab_title }}</div>
+      <div class="lab-meta">
+        Marked absent &mdash; complete this lab virtually to recover attendance
+      </div>
+      {% if item.submission %}
+      <a class="btn-open submitted">Submitted &mdash; Score: {{ item.submission.score }}/100</a>
+      {% else %}
+      <a href="/student/lab/{{ item.lab_id }}" class="btn-open">Open and Submit</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">&#10003;</div>
+    <h3>No missed labs</h3>
+    <p>You have not been marked absent for any lab sessions. Keep it up.</p>
+  </div>
+  {% endif %}
+</div>
+
+</body>
+</html>
